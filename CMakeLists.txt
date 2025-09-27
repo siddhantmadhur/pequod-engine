@@ -19,6 +19,21 @@ target_link_libraries(mercury "-lGL")
 target_link_libraries(mercury "-ldl")
 target_link_libraries(mercury "-lpthread")
 
+
+# link imgui
+
+set(IMGUI_SRC "third_party/imgui")
+add_library(imgui STATIC
+    ${IMGUI_SRC}/imgui.cpp
+    ${IMGUI_SRC}/imgui_widgets.cpp
+    ${IMGUI_SRC}/imgui_draw.cpp
+    ${IMGUI_SRC}/imgui_tables.cpp
+    ${IMGUI_SRC}/imgui_demo.cpp
+)
+
+target_include_directories(imgui INTERFACE imgui)
+
+target_link_libraries(mercury imgui)
 # MacOS libraries
 #target_link_libraries(mercury "-framework Cocoa")
 #target_link_libraries(mercury "-framework Metal")
