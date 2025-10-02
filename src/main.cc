@@ -10,11 +10,14 @@
 #include <imgui/imgui.h>
 #include <sokol/util/sokol_imgui.h>
 
+#include "1-triangle.shader.hh"
 
 //#include <engine/engine.cc>
 
 static struct {
+    sg_pipeline pip;
     sg_pass_action pass_action;
+    sg_bindings bind;
 } state;
 
 void engine_init() {
@@ -24,6 +27,28 @@ void engine_init() {
         },
         .environment = sglue_environment(),
     });
+
+    sg_shader shd = sg_make_shader(simple_shader_desc(sg_query_backend()));
+
+    float vertices[] = {
+        -0.5f, -0.5f,  0.0f, // bottom left
+         0.5f, -0.5f,  0.0f, // bottom right
+         0.0f,  0.5f,  0.0f, // top
+    };
+
+    state.bind.vertex_buffers[0] = sg_make_buffer((sg_buffer_desc){
+        .size = sizeof(vertices),
+        .data = SG_RANGE(vertices),
+        .label = "triangle-vertices"
+    });
+
+    sg_pipeline_desc pip_desc = (sg_pipeline_desc){
+        .shader = shd,
+        .label = "triangle-pipeline",
+    };
+    pip_desc.layout.attrs[ATTR_simple_position].format = SG_VERTEXFORMAT_FLOAT3;
+    state.pip = sg_make_pipeline(pip_desc);
+
 
     simgui_desc_t simgui_desc = { };
     simgui_desc.logger.func = slog_func;
@@ -45,6 +70,11 @@ void engine_frame() {
         .action = state.pass_action,
         .swapchain = sglue_swapchain(),
     });
+
+    sg_apply_pipeline(state.pip);
+    sg_apply_bindings(state.bind);
+    sg_draw(0, 3, 1);
+
     simgui_render();
     sg_end_pass();
     sg_commit();
@@ -53,7 +83,6 @@ void engine_frame() {
 void engine_event_cb(const sapp_event* event) {
     simgui_handle_event(event);
     if (event->type == SAPP_EVENTTYPE_KEY_DOWN) {
-        std::cout << event->type << std::endl;
         if (event->key_code == SAPP_KEYCODE_ESCAPE) {
             sapp_quit();
         }
