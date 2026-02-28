@@ -111,6 +111,9 @@ void PequodEngine::sokol_frame_cb() {
 }
 
 void PequodEngine::sokol_cleanup() {
+    if (currentScene) {
+        currentScene->OnEnd();
+    }
     simgui_shutdown();
     sg_shutdown();
 }

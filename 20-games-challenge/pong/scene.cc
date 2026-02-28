@@ -1,5 +1,6 @@
 
 #include "scene.hh"
+#include "glm/trigonometric.hpp"
 #include <engine/scene.hh>
 #include <gameobjects/quad.hh>
 
@@ -22,8 +23,25 @@ float height = 720.0f;
 #define BOTTOM_LEFT glm::vec2((-width/2.0f)*SCALE, -((height/2.0f)*SCALE))
 #define BOTTOM_RIGHT glm::vec2((width/2.0f)*SCALE, -((height/2.0f)*SCALE))
 
-void PongScene::OnStart() {
+void ResetRound(Shapes::Quad* ball, glm::vec2& vector, int playerWon) {
+    float deg = rand() % 60;
+    deg -= 30;
+    std::cout << "Using degree: " << deg << std::endl;
+    vector = glm::vec2(glm::cos(glm::radians(deg)), glm::sin(glm::radians(deg)));
     
+    if (playerWon) {
+        vector.x *= -1;
+    }
+    ball->SetPosition(glm::vec3(0.0f));
+    //vector = glm::normalize(vector);
+    #define MAX_ANGLE 0.80f
+    
+
+}
+
+void PongScene::OnStart() {
+
+
     ImGui::LoadIniSettingsFromDisk("position_settings.ini");
     { // configure 2d camera
 
@@ -74,7 +92,8 @@ void PongScene::OnStart() {
 
         this->enemy = enemy;
     }
-  { // configure paddles here
+
+    { // configure ball here
         //glm::vec2 offset_from_origin = glm::vec2(width / 2.0f, height / 2.0f) * (1/ZOOM);
         //Shapes::Quad *ball = new Shapes::Quad(glm::vec2(2.0f), glm::vec2((-offset_from_origin.x) + 16, 10.0f), glm::vec4(1.0f));
         Shapes::Quad *ball = new Shapes::Quad(glm::vec2(2.0f), glm::vec2(0.0f), glm::vec4(1.0f));
@@ -84,6 +103,10 @@ void PongScene::OnStart() {
         AddObject(*ball);
 
         this->ball = ball;
+
+        srand(time(NULL));
+
+        ResetRound(ball, ballVector, 0);
     }
 }
 
@@ -93,50 +116,76 @@ bool doCollide(glm::vec2 posA, glm::vec2 sizeA, glm::vec2 posB, glm::vec2 sizeB)
   return collisionX && collisionY;
 }
 
+
 void PongScene::OnUpdate() {
-    #define SPEED 0.3f
+    #define SPEED 0.2f
+
     if (this->player != NULL) {
         #define COLLISION_SIZE 100.0f
+
         float pos = player->GetPosition().y;
         float size = player->GetSize().y;
-
-
         float vel = direction.y * delta_t * SPEED;
-
         if (vel > 0) {
             float newPos = pos + vel;
-
             float finPos = glm::min(TOP_LEFT.y - size, newPos);
-            
             player->SetPosition(glm::vec3(player->GetPosition().x, finPos, 0));
         } else if (vel < 0) {
             float newPos = pos + vel;
-
             float finPos = glm::max(BOTTOM_LEFT.y + size, newPos);
-            
             player->SetPosition(glm::vec3(player->GetPosition().x, finPos, 0));
+        }
+    }
 
+    { // MOVE BALL HERE
+        #define BALL_SPEED 0.1f
+        ball->Move(glm::vec3(ballVector.x, ballVector.y, 0.0f) * delta_t * BALL_SPEED);
+        #define COLLISION_SIZE 100.0f
+
+        glm::vec3 pos = ball->GetPosition();
+        glm::vec2 size = ball->GetSize();
+        glm::vec2 vel = direction * delta_t * SPEED;
+
+
+        
+        { // Handle bouncing against floor and ceil 
+            Shapes::Quad upperBound = Shapes::Quad(glm::vec2(width, COLLISION_SIZE), TOP_LEFT, glm::vec4(1.0f));
+            Shapes::Quad lowerBound = Shapes::Quad(glm::vec2(width, COLLISION_SIZE), glm::vec2(BOTTOM_LEFT.x, BOTTOM_LEFT.y - COLLISION_SIZE), glm::vec4(1.0f));
+
+            if (doCollide(pos, size, upperBound.GetPosition(), upperBound.GetSize())) {
+                pos.y = glm::min(pos.y, TOP_LEFT.y + size.y); 
+                ball->SetPosition(pos);
+                ballVector.y *= -1;
+            }
+            if (doCollide(pos, size, lowerBound.GetPosition(), lowerBound.GetSize())) {
+                pos.y = glm::max(pos.y, BOTTOM_LEFT.y - size.y); 
+                ball->SetPosition(pos);
+                ballVector.y *= -1;
+            }
+        }
+
+        { // Handle scores
+            if (pos.x < TOP_LEFT.x) {
+                std::cout << "score for enemy" << std::endl;
+                enemyPoints += 1;
+                ResetRound(ball, ballVector, 0);
+            } 
+            if (pos.x + size.y > TOP_RIGHT.x) {
+                std::cout << "score for player" << std::endl;
+                playerPoints += 1;
+                ResetRound(ball, ballVector, 1);
+            } 
         }
         /**
-        glm::vec3 velocity = glm::vec3(direction.x * delta_t * SPEED, velocity_y, 0.0f);
-        if ((!doCollide(player->GetPosition(), player->GetSize(), TOP_LEFT, glm::vec2(TOP_RIGHT.x, 100.0f))) && velocity.y > 0) { // player colliding above
-            this->player->Move(velocity);
+        if (vel > 0) {
+            float newPos = pos + vel;
+            float finPos = glm::min(TOP_LEFT.y - size, newPos);
+            player->SetPosition(glm::vec3(player->GetPosition().x, finPos, 0));
+        } else if (vel < 0) {
+            float newPos = pos + vel;
+            float finPos = glm::max(BOTTOM_LEFT.y + size, newPos);
+            player->SetPosition(glm::vec3(player->GetPosition().x, finPos, 0));
         }
-        else if ((!doCollide(player->GetPosition(), player->GetSize(), BOTTOM_LEFT - glm::vec2(0.0f, COLLISION_SIZE), glm::vec2(BOTTOM_RIGHT.x, COLLISION_SIZE))) && velocity.y < 0) { // player colliding below
-            this->player->Move(velocity);
-        }
-        **/
-        glm::vec3 position = this->player->GetPosition();
-        /**
-        #define MAX_CEIL 70 
-        if (position.y > MAX_CEIL) {
-            position.y = MAX_CEIL;
-        }
-        if (position.y < -MAX_CEIL) {
-            position.y = -MAX_CEIL;
-        }
-        this->player->SetPosition(position);
-        //std::cout << "update value: (" << position.x << ", " << position.y << ")" << std::endl;
         **/
     }
 
@@ -147,28 +196,36 @@ void PongScene::OnUpdate() {
             std::cout << "COLLIDE!" << std::endl;
         }
     }
+    
+    {
+        ImGui::Begin("Scores", NULL, 0);
+        ImGui::Text("PLAYER - %d", playerPoints);
+        ImGui::Text("ENEMY - %d", enemyPoints);
+        ImGui::End();
+    }
 
-    bool open = true;
 
-    ImGui::Begin("positions", &open, 0);
-    glm::vec2 posA = player->GetPosition();
-    glm::vec2 sizeA = player->GetSize();
-    ImGui::Text("PLAYER: (%.2f, %.2f) (%.2f, %.2f)", posA.x, posA.y, sizeA.x, sizeA.y);
-    glm::vec2 posB = enemy->GetPosition();
-    glm::vec2 sizeB = enemy->GetSize();
-    ImGui::Text("ENEMY: (%.2f, %.2f) (%.2f, %.2f)", posB.x, posB.y, sizeB.x, sizeB.y);
-    glm::vec2 posC = ball->GetPosition();
-    glm::vec2 sizeC = ball->GetSize();
-    ImGui::Text("BALL: (%.2f, %.2f) (%.2f, %.2f)", posC.x, posC.y, sizeC.x, sizeC.y);
+    {
+        ImGui::Begin("positions", NULL, 0);
+        glm::vec2 posA = player->GetPosition();
+        glm::vec2 sizeA = player->GetSize();
+        ImGui::Text("PLAYER: (%.2f, %.2f) (%.2f, %.2f)", posA.x, posA.y, sizeA.x, sizeA.y);
+        glm::vec2 posB = enemy->GetPosition();
+        glm::vec2 sizeB = enemy->GetSize();
+        ImGui::Text("ENEMY: (%.2f, %.2f) (%.2f, %.2f)", posB.x, posB.y, sizeB.x, sizeB.y);
+        glm::vec2 posC = ball->GetPosition();
+        glm::vec2 sizeC = ball->GetSize();
+        ImGui::Text("BALL: (%.2f, %.2f) (%.2f, %.2f)", posC.x, posC.y, sizeC.x, sizeC.y);
 
-    ImGui::Text("UPPER BOUND: (%.2f, %.2f) -> (%.2f, %.2f)", TOP_LEFT.x, TOP_LEFT.y, TOP_RIGHT.x, TOP_RIGHT.y);
-    ImGui::End();
+        //ImGui::Text("BALL DIRECTION: (%.2f, %.2f) -> (%.2f, %.2f)", TOP_LEFT.x, TOP_LEFT.y, TOP_RIGHT.x, TOP_RIGHT.y);
+        ImGui::Text("BALL DIRECTION: (%.2f, %.2f)", ballVector.x, ballVector.y);
+        ImGui::End();
+    }
 
 }
 
 void PongScene::OnEvent(const sapp_event* event) {
     if (event->type == SAPP_EVENTTYPE_KEY_DOWN && event->key_repeat == false) {
-        ImGui::SaveIniSettingsToDisk("position_settings.ini");
         if (event->key_code == SAPP_KEYCODE_ESCAPE) {
             sapp_quit();
         }
@@ -181,7 +238,6 @@ void PongScene::OnEvent(const sapp_event* event) {
         }
     }
     if (event->type == SAPP_EVENTTYPE_KEY_UP) {
-        ImGui::SaveIniSettingsToDisk("position_settings.ini");
         if (event->key_code == SAPP_KEYCODE_W) {
             direction.y -= 1.0f;
         } 
@@ -198,3 +254,8 @@ void PongScene::OnEvent(const sapp_event* event) {
     }
 }
 
+
+void PongScene::OnEnd() {
+    std::cout << "Pong closing..."  << std::endl;
+    ImGui::SaveIniSettingsToDisk("position_settings.ini");
+}

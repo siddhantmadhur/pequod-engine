@@ -26,6 +26,7 @@ public:
     virtual void OnStart() =0; // runs at scene creation
     virtual void OnUpdate() =0; // runs once every frame
     virtual void OnEvent(const sapp_event* event) =0; // runs once every frame
+    virtual void OnEnd() =0; // runs when scene is closing
     void SetPlayerCamera(Camera& cam);
     Camera& GetPlayerCamera();
     void SetDelta(float delta_t);
