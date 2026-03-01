@@ -59,7 +59,7 @@ void BreakoutScene::OnStart() {
 
     { // ball
         ball_dx = glm::vec2(0.0f);
-        ball = new Shapes::Quad(glm::vec2(3.0f), glm::vec2(playerPos.x, playerPos.y + playerSize.y), glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
+        ball = new Shapes::Quad(glm::vec2(3.0f), glm::vec2(playerPos.x, playerPos.y + playerSize.y), glm::vec4(1.0f));
         AddObject(ball);
     }
 
@@ -72,11 +72,11 @@ void BreakoutScene::OnStart() {
         for (int j = 0; j < 6; j++) {
             offset.x = padding_around + (brick_size.x);
             for (int i = 0; i < 8; i++) {
-                Shapes::Quad* cur = new Shapes::Quad(brick_size, offset, glm::vec4(1.0 / j, 1.0 / i, 0.8f, 1.0f));
+                Shapes::Quad* cur = new Shapes::Quad(brick_size, offset, glm::vec4(1.0 / (6.0/j), 0.1f, 0.8f, 1.0f));
                 AddObject(cur);
                 offset.x += brick_size.x;
                 offset.x += 2;
-                //bricks.push_back(brick);
+                bricks.push_back(cur);
             }
             offset.y -= brick_size.y ;
             offset.y -= 2;

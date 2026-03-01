@@ -8,7 +8,7 @@
 
 
 GameObject::~GameObject() {
-    std::cout << "destroying gameobject" << std::endl;
+    //std::cout << "destroying gameobject" << std::endl;
 }
 std::vector<vertex_t> GameObject::getVertices() {
     return this->vertices; 
