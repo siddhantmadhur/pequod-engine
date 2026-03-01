@@ -15,33 +15,30 @@
 #include <sokol/util/sokol_imgui.h>
 
 
-static PequodEngine engine;
+PequodEngine* engine = NULL;
 
 void sokol_init() {
-    engine.sokol_init();
+    engine->sokol_init();
 };
 void sokol_frame_cb() {
-    engine.sokol_frame_cb();
+    engine->sokol_frame_cb();
 };
 void sokol_cleanup() {
-    engine.sokol_cleanup();
+    engine->sokol_cleanup();
 };
 void sokol_event(const sapp_event* event) {
-    engine.sokol_event(event);
+    engine->sokol_event(event);
 };
 
 sapp_desc sokol_main(int argc, char *argv[]) {
 
 
-    //engine = new PequodEngine();    
-    
-    engine.startUp();
+    engine = new PequodEngine();    
 
-    //Scene *demoScene = new Scene();
 
-    PongScene* demoScene = new PongScene();
+    BreakoutScene* game = new BreakoutScene();
 
-    engine.SetScene(demoScene);
+    engine->SetScene(game);
 
     return (sapp_desc){
         .init_cb = sokol_init,
@@ -50,7 +47,7 @@ sapp_desc sokol_main(int argc, char *argv[]) {
         .event_cb = sokol_event,
         .width = 1280,
         .height = 720,
-        .window_title = "Pong Demo - Pequod",
+        .window_title = "Breakout Demo - Pequod",
         .logger = {
             .func = slog_func,
         },
