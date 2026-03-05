@@ -30,6 +30,11 @@ Scene::Scene() : playerCamera(1.0f) {
     //indices.reserve(INIT_INDICES);
 }
 
+void Scene::simulatePhysics() {
+    float cHz = 1.0f / 60.0f;
+    ecs.physics_system.Update(cHz, 1, ecs.temp_allocator, ecs.job_system);
+}
+
 void Scene::Deinit() {
     /**
     for (int i = 0; i < objects.size(); i++) {

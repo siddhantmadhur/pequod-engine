@@ -158,29 +158,14 @@ void PongScene::OnEvent(const sapp_event* event) {
 
 void PongScene::OnTick(float tick_t) {
 
-    if (tick % 8 == 0) {
-        return;
-    }
 
-    /**
-    auto& bPos = ecs.getPosition(ball)->raw_position;
-    auto &ePos = ecs.getPosition(enemy)->raw_position;
 
-        float diff = bPos.y - ePos.y;
 
-    if (ePos.x - bPos.x < 32) {
-        #define MAX_STEP 3.0f
-        if (glm::abs(diff) > 5.0) {
-            ePos.y += (diff / glm::abs(diff))*2.0f;
-        } else {
-            ePos.y += diff ;
-        }
-    } else {
-        ePos.y += (diff / glm::abs(diff))*0.05f;
-    }
-   
-    **/
+}
 
+void PongScene::OnUpdate() {
+ 
+    
     float direction = 0.0f;
     if (IsKeyPressed(SAPP_KEYCODE_W)) {
         direction += 1.0f;
@@ -194,52 +179,13 @@ void PongScene::OnTick(float tick_t) {
 
     auto& body_interface = ecs.physics_system.GetBodyInterface();
 
-    body_interface.SetLinearVelocity(player_id, JPH::Vec3(0.0f, direction * 0.8, 0.0f));
-    body_interface.SetLinearVelocity(ball_id, JPH::Vec3(ballVelocity.x, ballVelocity.y, 0.0f));
+    #define CALC_SPEED 30.0f * delta_t
+    body_interface.SetLinearVelocity(player_id, JPH::Vec3(0.0f, direction * 0.8 * CALC_SPEED, 0.0f)); 
+    //body_interface.SetMotionType(ball_id, JPH::EMotionType::Kinematic , JPH::EActivation::Activate);
+    body_interface.SetLinearVelocity(ball_id, JPH::Vec3(ballVelocity.x * CALC_SPEED, ballVelocity.y * CALC_SPEED, 0.0f));
 
-    //auto &rMesh = ecs.getMesh(player)->scale;
+    //PDebug::info(std::format("tick_t: {}", tick_t));
 
-    //rPos.y = glm::max(rPos.y, rMesh.y / 2.0f); 
-    //rPos.y = glm::min(rPos.y, heights - (rMesh.y / 2.0f)); 
-
-    //if (doCollide(pos->raw_position, ))
-
-    /**
-    auto& ballPos = ecs.getPosition(ball)->raw_position;
-    auto& bMesh = ecs.getMesh(ball)->scale;
-    ballPos += glm::vec3(ballVelocity.x, ballVelocity.y, 0.0f) * 0.05f;
-
-    
-    if (ecs.doesCollide(enemy, ball) && ballVelocity.x > 0) {
-        ballVelocity.x *= -1;
-        ballPos.x = ePos.x - (ecs.getMesh(ball)->scale.x / 2.0f); 
-    }
-
-    if (ballPos.y + (bMesh.y/2.0f) > heights ) {
-        ballPos.y = (heights) - (ecs.getMesh(ball)->scale.y / 2.0f);
-        ballVelocity.y *= -1; 
-    }
-    if (ballPos.y - (bMesh.y/2.0f) < 0 ) {
-        ballPos.y = (ecs.getMesh(ball)->scale.y / 2.0f);
-        ballVelocity.y *= -1; 
-    }
-
-
-    if (ballPos.x < 0 || ballPos.x > widths) {
-        ResetRound();
-    }
-
-    */
-    
-    ecs.physics_system.Update(delta_t, 1, ecs.temp_allocator, ecs.job_system);
-
-}
-
-void PongScene::OnUpdate() {
- 
-    
-
-    auto& body_interface = ecs.physics_system.GetBodyInterface();
     auto pos = body_interface.GetPosition(player_id);
 
     auto* vPos = ecs.getPosition(player);
@@ -261,6 +207,8 @@ void PongScene::OnUpdate() {
         ImGui::Text("Player: (%.2f, %.2f, %.2f)", pos.GetX(), pos.GetY(), pos.GetZ());
        
         auto vel = body_interface.GetPosition(ball_id);
+        ImGui::Text("Ball Position: (%.2f, %.2f, %.2f)", vel.GetX(), vel.GetY(), vel.GetZ());
+        vel = body_interface.GetLinearVelocity(ball_id);
         ImGui::Text("Ball Velocity: (%.2f, %.2f, %.2f)", vel.GetX(), vel.GetY(), vel.GetZ());
 
         ImGui::End();

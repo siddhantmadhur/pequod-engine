@@ -136,7 +136,7 @@ void ECS::render(Camera& cam, float delta_t) {
 
 
         glm::vec3 diff = position->raw_position - position->position;
-        positions[i]->position += diff;
+        positions[i]->position += diff / delta_t;
         glm::vec3 pos = positions[i]->position;
 
 

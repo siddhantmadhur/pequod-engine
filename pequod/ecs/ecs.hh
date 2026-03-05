@@ -133,7 +133,6 @@ class MyContactListener : public ContactListener
 public:
 	virtual ValidateResult	OnContactValidate(const Body &inBody1, const Body &inBody2, JPH::RVec3Arg inBaseOffset, const JPH::CollideShapeResult &inCollisionResult) override
 	{
-        std::cout << "Contact validate callback" << std::endl;
 
 		// Allows you to ignore a contact before it is created (using layers to not make objects collide is cheaper!)
 		return ValidateResult::AcceptAllContactsForThisBodyPair;
@@ -141,17 +140,16 @@ public:
 
 	virtual void			OnContactAdded(const Body &inBody1, const Body &inBody2, const JPH::ContactManifold &inManifold, JPH::ContactSettings &ioSettings) override
 	{
-        std::cout << "A contact was added" << std::endl;
+        PDebug::log("Contact was added");
 	}
 
 	virtual void			OnContactPersisted(const Body &inBody1, const Body &inBody2, const JPH::ContactManifold &inManifold, JPH::ContactSettings &ioSettings) override
 	{
-        std::cout << "A contact was persisted" << std::endl;
 	}
 
 	virtual void			OnContactRemoved(const JPH::SubShapeIDPair &inSubShapePair) override
 	{
-        std::cout << "A contact was removed" << std::endl;
+        PDebug::log("Contact was removed");
 	}
 };
 
