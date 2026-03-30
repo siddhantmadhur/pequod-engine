@@ -85,7 +85,7 @@ void BreakoutScene::OnStart() {
         glm::vec2 size = glm::vec2(10.0f, height_s);
         glm::vec2 pos = glm::vec2(-size.x / 2.0f, size.y / 2.0f);
 
-        Quad* quad = new Quad(pos, size, glm::vec4(1.0f));
+        auto quad = std::make_shared<Quad>(pos, size, glm::vec4(1.0f));
         ecs.addPosition(wall, quad->position);
         ecs.addMesh(wall, quad->mesh);
 
