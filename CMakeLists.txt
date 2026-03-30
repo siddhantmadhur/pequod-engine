@@ -11,7 +11,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 file(GLOB_RECURSE ENGINE_SRC "pequod/*.cc")
 
-add_library(pequod ${ENGINE_SRC})
+add_library(pequod ${ENGINE_SRC}
+        pequod/pobject/property.h
+        pequod/pobject/property.cc
+        pequod/pobject/pobject.h
+        pequod/pobject/pobject.cc)
 
 
 include_directories("pequod")

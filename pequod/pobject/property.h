@@ -1,0 +1,18 @@
+//
+// Created by Siddhant Madhur on 27/03/2026.
+//
+
+#ifndef PEQUODENGINE_PROPERTY_H
+#define PEQUODENGINE_PROPERTY_H
+#include <cstdint>
+
+namespace Pequod {
+    enum PropertyId {
+
+    };
+    class Property {
+    public:
+        Property(PropertyId property_id);
+    };
+}
+#endif //PEQUODENGINE_PROPERTY_H

@@ -6,9 +6,5 @@
 GameObject::~GameObject() {
     PDebug::log("releasing game object...");
 }
-/**
-GameObject::GameObject() {
-    std::cout << "game object" << std::endl;
-}
-**/
 
+std::shared_ptr<Property> GameObject::
