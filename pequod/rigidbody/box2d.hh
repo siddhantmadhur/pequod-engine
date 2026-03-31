@@ -7,7 +7,7 @@
 #include <Jolt/Jolt.h>
 #include "Jolt/Physics/Body/Body.h"
 #include "glm/fwd.hpp"
-#include <rigidbody/rigidbody.hh>
+#include <pobject/properties/rigidbody.hh>
 
 namespace Pequod {
     class Box2D : public RigidBody {

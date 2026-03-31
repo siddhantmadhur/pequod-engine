@@ -12,13 +12,14 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 file(GLOB_RECURSE ENGINE_SRC "pequod/*.cc")
 
 add_library(pequod ${ENGINE_SRC}
-        pequod/pobject/property.h
-        pequod/pobject/property.cc
+        pequod/pobject/properties/property.h
+        pequod/pobject/properties/property.cc
         pequod/pobject/pobject.h
         pequod/pobject/pobject.cc
         pequod/ecs/ecs.hh
         pequod/ecs/ecs.cc
-        pequod/gameobjects/gameobject.cc)
+        pequod/gameobjects/gameobject.cc
+        pequod/physics_engine/physics_engine.h)
 
 
 include_directories("pequod")

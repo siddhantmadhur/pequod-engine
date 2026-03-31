@@ -5,7 +5,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-#include "pobject/property.h"
+#include "../pobject/properties/property.h"
 
 namespace Pequod {
     typedef struct vertex_t {

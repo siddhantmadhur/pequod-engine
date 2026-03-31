@@ -12,7 +12,7 @@
 #include <typeindex>
 #include <unordered_map>
 #include <string>
-#include "property.h"
+#include "properties/property.h"
 #include <vector>
 
 namespace Pequod {

@@ -1,0 +1,21 @@
+<scene>
+    <editor>
+        <version>
+            <major>0</major>
+            <minor>0</minor>
+            <patch>PRE_ALPHA</patch>
+        </version>
+        <name>SpaceInvaders</name>
+    </editor>
+    <camera>
+        <position x="0" y="0" />
+    </camera>
+    <objects>
+        <object name="cube">
+            <size x="100" y="100" />
+            <position x="0" y="0" />
+            <mesh type="solid" color="#FFFFFF" opacity="1.0f" />
+            <script src="pequod://scripts/character.luau" />
+        </object>
+    </objects>
+</scene>

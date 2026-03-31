@@ -23,7 +23,7 @@
 #include <sokol/sokol_gfx.h>
 #include <shaders/generic_texture.glsl.hh>
 
-#include "pobject/property.h"
+#include "../pobject/properties/property.h"
 
 namespace Pequod {
     // TODO: allow two gameobjects to combine their vertices so that the no. of draw calls is reduced

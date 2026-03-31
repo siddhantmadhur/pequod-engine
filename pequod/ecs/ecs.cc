@@ -5,7 +5,7 @@
 #include "ecs/position.hh"
 #include "engine/world_scene.h"
 #include "glm/ext/matrix_transform.hpp"
-#include "rigidbody/rigidbody.hh"
+#include "../pobject/properties/rigidbody.hh"
 #include <ecs/ecs.hh>
 #include <format>
 #include <iostream>
@@ -104,6 +104,9 @@ ECS::ECS () {
     current_id = 0;
     vertices = std::vector<vertex_t>();
     indices = std::vector<uint16_t>();
+
+    physics_engine = std::make_shared<PhysicsEngine>(properties<RigidBody>[typeid(RigidBody)]);
+
 }
 
 ECS::~ECS () {

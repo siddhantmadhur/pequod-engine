@@ -5,7 +5,7 @@
 #include "glm/geometric.hpp"
 #include "glm/trigonometric.hpp"
 #include "rigidbody/box2d.hh"
-#include "rigidbody/rigidbody.hh"
+#include "../../pequod/pobject/properties/rigidbody.hh"
 #include <format>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -91,8 +91,8 @@ void BreakoutScene::OnStart() {
         ecs.AddProperty(wall, quad->position);
         ecs.AddProperty(wall, quad->mesh);
 
-        WallRigidBody* rigid_body = new WallRigidBody(pos, size);
-        ecs.addRigidBody(wall, rigid_body);
+        auto rigid_body = std::make_shared<WallRigidBody>(pos, size);
+        ecs.AddProperty(wall, rigid_body);
         ecs.SetRestitution(wall, 0.0f);
         ecs.SetMotionType(wall, JPH::EMotionType::Static);
     }
@@ -106,8 +106,8 @@ void BreakoutScene::OnStart() {
         ecs.AddProperty(wall, quad->position);
         ecs.AddProperty(wall, quad->mesh);
 
-        WallRigidBody* rigid_body = new WallRigidBody(pos, size);
-        ecs.addRigidBody(wall, rigid_body);
+        auto rigid_body = std::make_shared<WallRigidBody>(pos, size);
+        ecs.AddProperty(wall, rigid_body);
         ecs.SetRestitution(wall, 0.0f);
         ecs.SetMotionType(wall, JPH::EMotionType::Static);
     }
@@ -121,8 +121,8 @@ void BreakoutScene::OnStart() {
         ecs.AddProperty(wall, quad->position);
         ecs.AddProperty(wall, quad->mesh);
 
-        WallRigidBody* rigid_body = new WallRigidBody(pos, size);
-        ecs.addRigidBody(wall, rigid_body);
+        auto rigid_body = std::make_shared<WallRigidBody>(pos, size);
+        ecs.AddProperty(wall, rigid_body);
         ecs.SetRestitution(wall, 0.0f);
         ecs.SetMotionType(wall, JPH::EMotionType::Static);
     }
@@ -135,10 +135,10 @@ void BreakoutScene::OnStart() {
         ecs.AddProperty(player, quad->position);
         ecs.AddProperty(player, quad->mesh);
         
-        PlayerRigidBody* rigid_body = new PlayerRigidBody(pos, size);
+        auto rigid_body = std::make_shared<WallRigidBody>(pos, size);
         rigid_body->allowed_dofs = JPH::EAllowedDOFs::TranslationX;
 
-        ecs.addRigidBody(player, rigid_body);
+        ecs.AddProperty(player, rigid_body);
         ecs.SetMotionType(player, JPH::EMotionType::Dynamic);
     }
 
@@ -152,8 +152,8 @@ void BreakoutScene::OnStart() {
         ecs.AddProperty(ball, quad->position);
         ecs.AddProperty(ball, quad->mesh);
         
-        BallRigidBody* rigid_body = new BallRigidBody(pos, size);
-        ecs.addRigidBody(ball, rigid_body);
+        auto rigid_body = std::make_shared<WallRigidBody>(pos, size);
+        ecs.AddProperty(ball, rigid_body);
         ecs.SetFriction(ball, 0.0f);
         ecs.SetRestitution(ball, 1.0f);
         ecs.SetMotionType(ball, JPH::EMotionType::Dynamic);
@@ -174,11 +174,10 @@ void BreakoutScene::OnStart() {
                 ecs.AddProperty(brick_id, quad->position);
                 ecs.AddProperty(brick_id, quad->mesh);
                
-                BrickRigidBody* rigid_body = new BrickRigidBody(offset, brick_size);
+                auto rigid_body = std::make_shared<BrickRigidBody>(offset, brick_size);
 
-                ecs.addRigidBody(brick_id, rigid_body);
+                ecs.AddProperty(brick_id, rigid_body);
                 ecs.SetMotionType(brick_id, JPH::EMotionType::Static);
-
 
                 offset.x += brick_size.x;
                 offset.x += 2;
