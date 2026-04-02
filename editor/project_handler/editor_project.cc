@@ -9,6 +9,7 @@
 #include <cstring>
 #include <stdlib.h>
 #include <filesystem>
+#include <serialization/serialization.h>
 
 #define STR_LEN 128
 
@@ -133,7 +134,10 @@ namespace Pequod {
                     ToggleOpenProjectWin();
                 }
                 if (ImGui::MenuItem("Save Scene", "Ctrl+S")) {
-                    SaveScene();
+                    auto doc = Serialization::Marshal(object_manager->GetRoot());
+                    XMLPrinter printer;
+                    doc->Print(&printer);
+                    PDebug::log(std::format("XML: {}", printer.CStr()));
                 }
                 ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
                 if (ImGui::MenuItem("Quit", "Ctrl+Q")) {

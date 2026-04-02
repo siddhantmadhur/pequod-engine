@@ -38,7 +38,7 @@ namespace Pequod {
         }
         if (open) {
             for (auto child_id: obj->children) {
-                DrawID(child_id);
+                DrawID(child_id->id);
             }
             ImGui::TreePop();
         }

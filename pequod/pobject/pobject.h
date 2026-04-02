@@ -39,9 +39,10 @@ namespace Pequod {
         uint64_t id = 0; // 0 signifies root
         std::string name = "object";
 
-        void AddChild(uint64_t child_id);
+        void AddChild(std::shared_ptr<PObject>);
 
-        std::vector<uint64_t> children = {};
+        std::vector<std::shared_ptr<PObject>> children = {};
+
 
         void SetECS(std::shared_ptr<ECS>);
 

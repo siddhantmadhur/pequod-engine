@@ -7,14 +7,13 @@
 #include <tinyxml2.h>
 #include <pobject/pobject.h>
 
-using tinyxml2::XMLDocument;
+using namespace tinyxml2;
 
-namespace Pequod {
-    namespace Serialization {
-        XMLDocument Marshal();
+namespace Pequod::Serialization {
+    std::unique_ptr<XMLDocument> Marshal(std::shared_ptr<PObject>);
 
-        std::shared_ptr<PObject> Unmarshal();
-    }
+    std::shared_ptr<PObject> Unmarshal(std::unique_ptr<XMLDocument>);
 }
+
 
 #endif //

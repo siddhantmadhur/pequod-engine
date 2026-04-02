@@ -40,7 +40,7 @@ namespace Pequod {
 
             if (parent) {
                 parents.push_back(parent);
-                parent->children.push_back(object->id);
+                parent->children.push_back(object);
             }
 
             return object;

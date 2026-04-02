@@ -14,8 +14,8 @@ namespace Pequod {
     PObject::~PObject() {
     }
 
-    void PObject::AddChild(uint64_t child_id) {
-        children.push_back(child_id);
+    void PObject::AddChild(std::shared_ptr<PObject> child) {
+        children.push_back(child);
     }
 
 
