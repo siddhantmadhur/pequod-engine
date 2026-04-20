@@ -196,9 +196,6 @@ void D3D11Application::Render() {
   swapchain_->Present(1, 0);
 }
 
-void D3D11Application::UpdateOnFrame() {}
-
-void D3D11Application::UpdateOnTick() {}
 
 void D3D11Application::OnResize(int32_t width, int32_t height) {
   Application::OnResize(width, height);

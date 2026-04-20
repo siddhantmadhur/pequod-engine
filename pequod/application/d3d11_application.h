@@ -31,12 +31,10 @@ class D3D11Application : public Application {
 
  protected:
   bool OnLoad() override;         // Runs when the application is created
-  void UpdateOnTick() override;   // Runs every tick (takes priority over frame)
-  void UpdateOnFrame() override;  // Runs every frame
   void Render() override;         // Renders objects
   bool Initialize() override;     // Renders objects
 
-  void OnResize(int32_t width, int32_t height);
+  void OnResize(int32_t width, int32_t height) override;
   static bool CompileShader(const std::wstring& fileName,
                             const std::string& entryPoint,
                             const std::string& profile,
