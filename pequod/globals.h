@@ -14,9 +14,10 @@
 using entity_id = uint16_t;
 #define height_s (sapp_heightf() * (1.0f / ZOOM))
 #define width_s (sapp_widthf() * (1.0f / ZOOM))
+using PQ_FLOAT3 = DirectX::XMFLOAT3;
 
-using Position = DirectX::XMFLOAT3;
-using Color = DirectX::XMFLOAT3;
+using Position = PQ_FLOAT3;
+using Color = PQ_FLOAT3;
 
 struct Vertex {
   Position position;
@@ -35,4 +36,9 @@ struct Primitive {
   std::vector<UINT> indices;
 };
 
+// Handles information on a per-model basis
+struct VsModelBuffer {
+  PQ_FLOAT3 scale;
+  float opacity;
+};
 #endif  // PEQUODENGINE_GLOBALS_H
