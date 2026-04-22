@@ -37,7 +37,7 @@ If a platform is not on the list then that means supporting is not a goal of thi
 ## Contributing
 
 Pequod is open-source but not open-contribution. Features part of this engine
-are specifically for games **we** want to make and not to be generalized.
+are specifically for games **I** want to make and not to be generalized.
 In fact there are much better engines already out there that do most things
 better so I'd recommend using that if you cannot find a feature here.
 
