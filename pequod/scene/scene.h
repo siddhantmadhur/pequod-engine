@@ -15,6 +15,7 @@
 
 #include "gameobjects/camera.hh"
 #include "input/input_manager.h"
+#include "physics_engine/physics_engine.h"
 #include "pobject/manager.h"
 
 namespace Pequod {
@@ -47,6 +48,8 @@ class GameScene {
   std::unique_ptr<PObjectManager> object_manager_ = nullptr;
   std::unique_ptr<Camera> player_camera_ = nullptr;
   InputManager* input_manager_ = nullptr;
+
+  std::unique_ptr<PhysicsEngine> physics_engine_ = nullptr;
 
  private:
   float width_ = 0.0;

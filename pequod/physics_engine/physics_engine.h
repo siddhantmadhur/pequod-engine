@@ -1,4 +1,4 @@
-/*
+/**
  * physics_engine.h
  *
  * Physics system for game objects
@@ -13,153 +13,82 @@
  */
 #ifndef PEQUOD_PHYSICS_ENGINE_H_
 #define PEQUOD_PHYSICS_ENGINE_H_
+#include <map>
 
-#include <Jolt/Jolt.h>
-#include <Jolt/Core/Memory.h>
-#include <properties/collision_body.h>
-
-#include "Jolt/Core/Factory.h"
-#include "Jolt/Core/JobSystemThreadPool.h"
-#include "Jolt/Core/TempAllocator.h"
-#include "Jolt/Physics/Body/BodyActivationListener.h"
-#include "Jolt/Physics/Body/BodyID.h"
-#include "Jolt/Physics/Body/MotionType.h"
-#include "Jolt/Physics/Collision/BroadPhase/BroadPhaseLayer.h"
-#include "Jolt/Physics/Collision/CollideShape.h"
-#include "Jolt/Physics/Collision/ContactListener.h"
-#include "Jolt/Physics/Collision/ObjectLayer.h"
-#include "Jolt/Physics/PhysicsSettings.h"
-#include "Jolt/Physics/PhysicsSystem.h"
-#include "Jolt/RegisterTypes.h"
-#include "debugger/debugger.h"
+#include "Jolt/Core/Core.h"
+#include "Jolt/Physics/Body/Body.h"
 #include "globals.h"
-#include "pobject/pobject.h"
-#include "rigidbody/rigidbody.hh"
-
-// [CLAUDE] TODO: 'using namespace JPH' in a header pollutes every TU that
-// includes this — move to .cc or use JPH:: prefix
-using namespace JPH;
+#include "pobject/manager.h"
+#include "properties/collision_body.h"
 
 namespace Pequod {
-namespace {
-class ObjectLayerPairFilterImpl : public ObjectLayerPairFilter {
- public:
-  virtual bool ShouldCollide(ObjectLayer inObject1,
-                             ObjectLayer inObject2) const override {
-    switch (inObject1) {
-      case Layers::NON_MOVING:
-        return inObject2 ==
-               Layers::MOVING;  // Non moving only collides with moving
-      case Layers::MOVING:
-        return true;  // Moving collides with everything
-      default:
-        JPH_ASSERT(false);
-        return false;
-    }
-  }
-};
 
-namespace BroadPhaseLayers {
-static constexpr BroadPhaseLayer NON_MOVING(0);
-static constexpr BroadPhaseLayer MOVING(1);
-static constexpr uint NUM_LAYERS(2);
-};  // namespace BroadPhaseLayers
+/**
+ * @brief Function type that runs whenever bodies collide
+ */
+using CollisionCallbackLambda =
+    std::function<void(kEntityId self, kEntityId other)>;
 
-class BPLayerInterfaceImpl final : public BroadPhaseLayerInterface {
- public:
-  BPLayerInterfaceImpl() {
-    // Create a mapping table from object to broad phase layer
-    mObjectToBroadPhase[Layers::NON_MOVING] = BroadPhaseLayers::NON_MOVING;
-    mObjectToBroadPhase[Layers::MOVING] = BroadPhaseLayers::MOVING;
-  }
-
-  virtual uint GetNumBroadPhaseLayers() const override {
-    return BroadPhaseLayers::NUM_LAYERS;
-  }
-
-  virtual BroadPhaseLayer GetBroadPhaseLayer(
-      ObjectLayer inLayer) const override {
-    JPH_ASSERT(inLayer < Layers::NUM_LAYERS);
-    return mObjectToBroadPhase[inLayer];
-  }
-
- private:
-  BroadPhaseLayer mObjectToBroadPhase[Layers::NUM_LAYERS];
-};
-
-class ObjectVsBroadPhaseLayerFilterImpl : public ObjectVsBroadPhaseLayerFilter {
- public:
-  virtual bool ShouldCollide(ObjectLayer inLayer1,
-                             BroadPhaseLayer inLayer2) const override {
-    switch (inLayer1) {
-      case Layers::NON_MOVING:
-        PDebug::info("Non moving!");
-        return inLayer2 == BroadPhaseLayers::MOVING;
-      case Layers::MOVING:
-        return true;
-      default:
-        JPH_ASSERT(false);
-        return false;
-    }
-  }
-};
-
-class MyBodyActivationListener : public JPH::BodyActivationListener {
- public:
-  virtual void OnBodyActivated(const JPH::BodyID& inBodyID,
-                               JPH::uint64 inBodyUserData) override {}
-
-  virtual void OnBodyDeactivated(const JPH::BodyID& inBodyID,
-                                 JPH::uint64 inBodyUserData) override {}
-};
-}  // namespace
-
-enum class CollisionType {
-  kCollisionNone,
-  kCollisionEnter,
-  kCollisionOn,
-  kCollisionLeave
-};
-
+/**
+ * @brief Provides easy-access to Physics using Jolt
+ *
+ * It is a basic wrapper around Jolt. It is designed to be simple and not add
+ * features, rather rely completely on Jolt for most things like resource
+ * management and physics simulations.
+ *
+ * Rather it provides a way to interface PObject's with Physics. Like allowing
+ * on collision functions to be defined as lambdas that are called on collision
+ * rather than complete classes that have to stay through the entire program
+ * lifetime.
+ */
 class PhysicsEngine {
  public:
   PhysicsEngine();
-  ~PhysicsEngine();
 
-  // Add object to physics system
-  void RegisterEntity(std::shared_ptr<PObject>, CollisionBody);
+  /**
+   * @brief Initialize Jolt before computing
+   */
+  void Initialize();
 
+  /**
+   * @brief Calculate the physics for the environment such as collision
+   * @param steps No. of steps to take in a computation (1 every 60hz)
+   */
   void Compute(int steps);
 
-  // [CLAUDE] TODO: DisableBody is declared but never implemented
-  void DisableBody(entity_id);
+  /**
+   * @brief Register a body to the physics engine before adding properties
+   */
+  void RegisterBody(kEntityId id, CollisionBody body);
 
-  // use to check the collided status
-  CollisionType GetCollisionState(entity_id self, entity_id other) const;
+  /**
+   * @brief Triggers when a collision first occurs
+   * @param self The Entity ID of the registered PObject
+   * @param callback The callback function to trigger
+   */
+  void SetOnEnterCollision(kEntityId self, CollisionCallbackLambda callback);
 
-  // Returns the bodies colliding with the object
-  std::vector<entity_id> GetCollidingBodies(entity_id) const;
+  /**
+   * @brief Triggers when bodies are colliding
+   * @param self The Entity ID of the registered PObject
+   * @param callback The callback function to trigger
+   */
+  void SetOnDuringCollision(kEntityId self, CollisionCallbackLambda callback);
+
+  /**
+   * @brief Triggers when body stops colliding
+   * @param self The Entity ID of the registered PObject
+   * @param callback The callback function to trigger
+   */
+  void SetOnLeaveCollision(kEntityId self, CollisionCallbackLambda callback);
 
  private:
-  // [CLAUDE] TODO: body_id is declared but never used
-  BodyID* body_id = nullptr;
-
-  std::vector<std::shared_ptr<PObject>> objects_;
-
-  // [CLAUDE] TODO: jolt_bodies is never populated — physics system not
-  // initialized
-  std::unordered_map<JPH::BodyID, entity_id>
-      jolt_bodies;  // maps jolt id <--> pequods entity_id
-
-  TempAllocatorImpl* temp_allocator = nullptr;  // 10MB
-  JobSystemThreadPool* job_system = nullptr;
-  PhysicsSystem physics_system;
-
-  BPLayerInterfaceImpl broad_phase_layer_interface;
-  ObjectVsBroadPhaseLayerFilterImpl object_vs_broadphase_layer_filter;
-  ObjectLayerPairFilterImpl object_vs_object_layer_filter;
-  MyBodyActivationListener body_activation_listener;
+  std::map<kEntityId, CollisionCallbackLambda> on_collision_ = {};
+  std::map<kEntityId, CollisionCallbackLambda> on_collision_enter_ = {};
+  std::map<kEntityId, CollisionCallbackLambda> on_collision_leave_ = {};
+  std::map<JPH::BodyID, kEntityId> jolt_bodies_ref_ = {};
 };
+
 }  // namespace Pequod
 
 #endif

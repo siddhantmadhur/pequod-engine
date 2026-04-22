@@ -22,6 +22,8 @@ void PongScene::OnStart() {
                                               glm::vec4(1.0f));
   enemy_ = object_manager_->NewObject<Box2D>(offset, glm::vec2(2.0f, 10.0f),
                                              glm::vec4(1.0f));
+
+  on_collisions_[player_->id] = [this]() { this->DestroyBrick(); };
 };
 
 void PongScene::OnFrame(double delta_t) {};
@@ -32,6 +34,10 @@ void PongScene::OnTick(double delta_t) {
   if (input_manager_) {
     if (input_manager_->IsPressed(GLFW_KEY_ESCAPE)) {
       this->QuitScene();
+    }
+
+    if (input_manager_->IsPressed(GLFW_KEY_SPACE)) {
+      on_collisions_[player_->id]();
     }
 
     auto transform = player_->Get<Transform>();
@@ -46,4 +52,5 @@ void PongScene::OnTick(double delta_t) {
   }
 };
 
-void PongScene::OnDestroy() {};
+void PongScene::OnDestroy() {}
+void PongScene::DestroyBrick() { PDebug::warn("Brick has collided"); };
