@@ -18,6 +18,7 @@ enum TransformationType {
 class Transform : public Property {
  public:
   Transform();
+  Transform(glm::vec3 position);
   glm::vec3 GetPosition() const;
   void SetPosition(glm::vec3);
   glm::vec3 GetInterpolatedPosition() const;

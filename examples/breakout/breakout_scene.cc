@@ -8,7 +8,7 @@
 #include "physics_engine/shapes/box.h"
 #include "pobject/nodes/box2d.h"
 #include "properties/transform.h"
-
+#include <physics_engine/shapes/plane.h>
 constexpr float ZOOM = 2.0f;
 #define scaled_width (GetWidth() / (ZOOM))
 #define scaled_height (GetHeight() / (ZOOM))
@@ -27,8 +27,20 @@ void BreakoutScene::OnStart() {
 
     physics_engine_->RegisterBody(player, Physics::Box(dim),
                                   JPH::EAllowedDOFs::TranslationX);
-    physics_engine_->Set<kMotionType>(*player, JPH::EMotionType::Kinematic);
-    physics_engine_->Set<kRestitution>(*player, 1.0f);
+    physics_engine_->Set<kMotionType>(*player, JPH::EMotionType::Dynamic);
+    physics_engine_->Set<kRestitution>(*player, 0.0f);
+  }
+  {  // left wall
+    auto wall = object_manager_->NewObject<PObject>();
+    wall->Add<Transform>(glm::vec3(-scaled_width / 2.0f, 0, 0));
+    physics_engine_->RegisterBody(wall, Physics::Plane(glm::vec3(1, 0, 0)),
+                                  JPH::EAllowedDOFs::All);
+  }
+  {  // right wall
+    auto wall = object_manager_->NewObject<PObject>();
+    wall->Add<Transform>(glm::vec3(scaled_width / 2.0f, 0, 0));
+    physics_engine_->RegisterBody(wall, Physics::Plane(glm::vec3(-1, 0, 0)),
+                                  JPH::EAllowedDOFs::All);
   }
 }
 
@@ -37,10 +49,12 @@ void BreakoutScene::OnFrame(double delta_t) {}
 void BreakoutScene::OnTick(double delta_t) {
   constexpr int SPEED = 20;
   float direction = 0.0f;
-  if (input_manager_->IsPressed(GLFW_KEY_A)) {
+  if (input_manager_->IsPressed(GLFW_KEY_A) ||
+      input_manager_->IsPressed(GLFW_KEY_LEFT)) {
     direction -= 1.0f;
   }
-  if (input_manager_->IsPressed(GLFW_KEY_D)) {
+  if (input_manager_->IsPressed(GLFW_KEY_D) ||
+      input_manager_->IsPressed(GLFW_KEY_RIGHT)) {
     direction += 1.0f;
   }
 

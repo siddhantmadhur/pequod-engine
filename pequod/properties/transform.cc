@@ -12,6 +12,7 @@ Transform::Transform() {
   this->interpolated_position_ = glm::vec3(0.0f);
   this->velocity_ = glm::vec3(0.0f);
 }
+Transform::Transform(glm::vec3 position) { SetPosition(position); }
 
 glm::vec3 Transform::GetPosition() const { return this->position_; }
 void Transform::SetPosition(glm::vec3 position) {

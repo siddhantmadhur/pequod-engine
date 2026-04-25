@@ -1,5 +1,7 @@
 #include "physics_engine.h"
 
+#include "shapes/box.h"
+#include "shapes/plane.h"
 #include "Jolt/Core/Factory.h"
 #include "Jolt/RegisterTypes.h"
 #include "properties/transform.h"
@@ -123,9 +125,12 @@ void PhysicsEngine::Initialize() {
   PDebug::info("Initialized Jolt Physics System");
 }
 
+template <class TCollisionShape>
 void PhysicsEngine::RegisterBody(std::shared_ptr<PObject> self,
-                                 CollisionBody collision_body,
-                                 JPH::EAllowedDOFs allowed_dofs) {
+                                 TCollisionShape collision_body,
+                                 JPH::EAllowedDOFs allowed_dofs)
+  requires std::derived_from<TCollisionShape, CollisionBody>
+{
   PDebug::info("Registering body to physics engine...");
   auto transform = self->Get<Transform>();
   if (transform == nullptr) {
@@ -137,10 +142,11 @@ void PhysicsEngine::RegisterBody(std::shared_ptr<PObject> self,
   auto creation_settings = JPH::BodyCreationSettings(
       collision_body.GetShapeRef(),
       JPH::RVec3(position.x, position.y, position.z), JPH::Quat::sIdentity(),
-      JPH::EMotionType::Kinematic, Layers::MOVING);
+      JPH::EMotionType::Static, Layers::MOVING);
 
   creation_settings.mAllowedDOFs = allowed_dofs;
-  creation_settings.mLinearDamping = 0.0f;
+  collision_body.OverrideBodyCreation(creation_settings);
+
   auto& body_interface = physics_system_.GetBodyInterface();
 
   auto body = body_interface.CreateBody(creation_settings);
@@ -291,5 +297,12 @@ void PhysicsEngine::AddCollisionCallback<kCollisionLeave>(
     kEntityId self, CollisionCallbackLambda callback_lambda) {
   this->on_collision_leave_[self] = callback_lambda;
 }
+
+template void PhysicsEngine::RegisterBody<class Physics::Box>(
+    class std::shared_ptr<class PObject>, class Physics::Box,
+    enum JPH::EAllowedDOFs);
+template void PhysicsEngine::RegisterBody<class Physics::Plane>(
+    class std::shared_ptr<class PObject>, class Physics::Plane,
+    enum JPH::EAllowedDOFs);
 
 }  // namespace Pequod
