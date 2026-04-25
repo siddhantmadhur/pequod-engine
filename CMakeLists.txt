@@ -44,6 +44,8 @@ add_library(pequod
         pequod/scene/scene.cc
         pequod/input/input_manager.cc
         pequod/input/input_manager.h
+        pequod/properties/texture2d.cc
+        pequod/properties/texture2d.h
 )
 
 
