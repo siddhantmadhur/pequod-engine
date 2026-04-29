@@ -9,20 +9,45 @@
 #ifndef PEQUODENGINE_GLOBALS_H
 #define PEQUODENGINE_GLOBALS_H
 
-#include <DirectXMath.h>
-#include <intsafe.h>
-
 #include <cstdint>
+#include <cstring>
 #include <glm/glm.hpp>
 #include <vector>
+
+#ifdef PEQUOD_GRAPHICS_D3D11
+#include <DirectXMath.h>
+#include <intsafe.h>
+#endif
 
 using entity_id = uint16_t;
 using kEntityId = uint16_t;
 #define height_s (sapp_heightf() * (1.0f / ZOOM))
 #define width_s (sapp_widthf() * (1.0f / ZOOM))
+
+#ifdef PEQUOD_GRAPHICS_D3D11
 using PQ_FLOAT2 = DirectX::XMFLOAT2;
 using PQ_FLOAT3 = DirectX::XMFLOAT3;
 using PQ_MATRIX = DirectX::XMFLOAT4X4;
+#else
+struct PQ_FLOAT2 {
+  float x, y;
+  PQ_FLOAT2() = default;
+  PQ_FLOAT2(float a, float b) : x(a), y(b) {}
+  explicit PQ_FLOAT2(const float* p) : x(p[0]), y(p[1]) {}
+};
+struct PQ_FLOAT3 {
+  float x, y, z;
+  PQ_FLOAT3() = default;
+  PQ_FLOAT3(float a, float b, float c) : x(a), y(b), z(c) {}
+  explicit PQ_FLOAT3(const float* p) : x(p[0]), y(p[1]), z(p[2]) {}
+};
+struct PQ_MATRIX {
+  float m[4][4];
+  PQ_MATRIX() = default;
+  explicit PQ_MATRIX(const float* p) { std::memcpy(m, p, sizeof(m)); }
+};
+using UINT = uint32_t;
+#endif
 
 struct Vertex {
   PQ_FLOAT3 position;
