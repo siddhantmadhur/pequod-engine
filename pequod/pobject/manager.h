@@ -12,6 +12,7 @@
 
 #include "globals.h"
 #include "pobject.h"
+#include "texture_atlas.h"
 
 namespace Pequod {
 
@@ -70,6 +71,7 @@ class PObjectManager {
 
  private:
   std::vector<std::shared_ptr<PObject>> objects = {};
+  TextureAtlas atlas_;
 };
 }  // namespace Pequod
 

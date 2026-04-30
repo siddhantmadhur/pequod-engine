@@ -41,10 +41,12 @@ std::vector<Primitive> PObjectManager::GetPrimitives() {
         primitive.texture_data_ = tex->GetData();
         primitive.texture_width_ = tex->GetWidth();
         primitive.texture_height_ = tex->GetHeight();
+        atlas_.AddTexture(tex);
       }
       primitives.push_back(primitive);
     }
   }
+  atlas_.UpdateAtlas();
   return primitives;
 }
 

@@ -9,19 +9,27 @@
 
 #include <string>
 
+#include "glm/vec4.hpp"
+
 namespace Pequod {
 class Texture2D : public Property {
  public:
   Texture2D(const std::string& file_path);
   ~Texture2D();
 
-  const stbi_uc* GetData()   const { return raw_data; }
-  int            GetWidth()  const { return x; }
-  int            GetHeight() const { return y; }
+  const stbi_uc* GetData() const { return raw_data; }
+  int GetWidth() const { return x; }
+  int GetHeight() const { return y; }
+  std::string GetPath() const;
+
+  void SetAtlasUV(glm::vec4);
 
  private:
   stbi_uc* raw_data = nullptr;
   int x, y, channels;
+  std::string path_;
+
+  glm::vec4 atlas_uv_;
 };
 }  // namespace Pequod
 

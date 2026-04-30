@@ -70,4 +70,10 @@ struct VsModelBuffer {
   float opacity;
   PQ_MATRIX world_position;
 };
+
+#define PEQUOD_SAFE_FREE(pointer) \
+  {                               \
+    delete pointer;               \
+    pointer = nullptr;            \
+  }
 #endif  // PEQUODENGINE_GLOBALS_H
