@@ -18,12 +18,14 @@
 
 namespace Pequod {
 PObjectManager::PObjectManager() = default;
+PObjectManager::~PObjectManager() {
+  for (int i = 0; i < objects.size(); i++) {
+    delete objects[i];
+  }
+}
 std::vector<Primitive> PObjectManager::GetPrimitives() {
   std::vector<Primitive> primitives;
-  for (const auto& object : objects) {
-    if (object == nullptr) {
-      continue;
-    }
+  for (auto& object : objects) {
     if (auto mesh = object->Get<Mesh>()) {
       Primitive primitive = {};
       primitive.indices_ = mesh->GetIndices();
@@ -37,7 +39,7 @@ std::vector<Primitive> PObjectManager::GetPrimitives() {
         primitive.world_position_ = glm::vec3(1.0f);
       }
 
-      std::shared_ptr<Texture2D> tex = object->Get<Texture2D>();
+      auto tex = object->Get<Texture2D>();
       if (tex) {
         atlas_.AddTexture(tex);
       }
@@ -48,8 +50,7 @@ std::vector<Primitive> PObjectManager::GetPrimitives() {
   // Populate atlas UVs after the atlas has been (re)packed so each primitive
   // sees its current sub-rect.
   size_t pi = 0;
-  for (const auto& object : objects) {
-    if (object == nullptr) continue;
+  for (auto& object : objects) {
     if (!object->Get<Mesh>()) continue;
     if (auto tex = object->Get<Texture2D>()) {
       primitives[pi].atlas_uv_ = tex->GetAtlasUV();
@@ -60,6 +61,9 @@ std::vector<Primitive> PObjectManager::GetPrimitives() {
   }
   return primitives;
 }
+void PObjectManager::GroupPrimitives(kEntityId primary, kEntityId begin,
+                                     kEntityId end) {}
+void PObjectManager::GenerateVertices() {}
 
 void PObjectManager::DeleteObject(kEntityId id) { objects[id] = nullptr; }
 }  // namespace Pequod

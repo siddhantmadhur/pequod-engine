@@ -32,6 +32,7 @@ namespace Pequod {
 class PObjectManager {
  public:
   PObjectManager();
+  ~PObjectManager();
 
   /**
    * @brief Returns a list of primitives to draw
@@ -45,6 +46,17 @@ class PObjectManager {
   std::vector<Primitive> GetPrimitives();
 
   /**
+   * @brief Combines a group of primitives so it returns as one instance to the
+   * GPU
+   *
+   * @param primary The main primitive for which the others will override their
+   * Position(), Texture() values with
+   * @param begin The first primitive to begin grouping with
+   * @param end The last primitive to end grouping with
+   */
+  void GroupPrimitives(kEntityId primary, kEntityId begin, kEntityId end);
+
+  /**
    * @brief Create a new object in the manager
    *
    * @tparam PType The base class the object needs to be generated from (eg.
@@ -54,26 +66,28 @@ class PObjectManager {
    */
   template <std::derived_from<PObject> PType, class... Args>
     requires std::constructible_from<PType, Args...>
-  std::shared_ptr<PType> NewObject(Args &&...args) {
-    std::shared_ptr<PType> object =
-        std::make_shared<PType>(std::forward<Args>(args)...);
+  PType* NewObject(Args&&... args) {
+    auto object = new PType(std::forward<Args>(args)...);
     object->id = objects.size();
     objects.push_back(object);
     return object;
   }
 
+  void GenerateVertices();
+  std::vector<Vertex> GetVertices() const;
   void DeleteObject(kEntityId id);
 
   TextureAtlas& GetAtlas() { return atlas_; }
 
-  std::shared_ptr<PObject> GetObjectById(entity_id id) {
+  PObject* GetObjectById(entity_id id) {
     if (id < objects.size()) return objects[id];
     return nullptr;
   }
 
  private:
-  std::vector<std::shared_ptr<PObject>> objects = {};
+  std::vector<PObject*> objects = {};
   TextureAtlas atlas_;
+  std::vector<Vertex> vertices_;
 };
 }  // namespace Pequod
 
