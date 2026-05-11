@@ -74,6 +74,9 @@ class PObjectManager {
   kEntityId NewPlane2D(glm::vec3 position, glm::vec2 size,
                        glm::vec4 color = glm::vec4(1.0));
 
+  kEntityId NewObjectFromFile(const std::string& file_path, float scale = 1.0,
+                              glm::vec4 color = glm::vec4(1));
+
   template <class TProperty>
     requires std::derived_from<TProperty, Property>
   void AddProperty(kEntityId self, TProperty property) {
