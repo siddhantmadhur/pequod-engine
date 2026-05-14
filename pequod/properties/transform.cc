@@ -4,20 +4,27 @@
 
 #include "transform.h"
 
+#include "glm/common.hpp"
 #include "debugger/debugger.h"
+#include "glm/detail/func_geometric.inl"
 
 namespace Pequod {
 Transform::Transform() : transformations_(0) {
   this->position_ = glm::vec3(0.0f);
   this->interpolated_position_ = glm::vec3(0.0f);
+  this->previous_position_ = glm::vec3(0.0f);
   this->velocity_ = glm::vec3(0.0f);
 }
-Transform::Transform(glm::vec3 position) { SetPosition(position); }
+Transform::Transform(glm::vec3 position) : transformations_(0) {
+  this->position_ = position;
+  this->previous_position_ = position;
+  this->interpolated_position_ = position;
+  this->velocity_ = glm::vec3(0.0f);
+}
 
 glm::vec3 Transform::GetPosition() const { return this->position_; }
 void Transform::SetPosition(glm::vec3 position) {
   this->position_ = position;
-  this->interpolated_position_ = position;
   transformations_.push_back(kTransformPosition);
 }
 
@@ -39,18 +46,12 @@ glm::vec3 Transform::GetInterpolatedPosition() const {
   return this->interpolated_position_;
 }
 
-void Transform::InterpolatePosition(float delta_t, float tick_t) {
-  if (delta_t == 0 || tick_t == 0) {
-    return;
-  }
-  /*
-   * The goal is to smooth out position between ticks
-   * If FPS is 240 and TPS is 20 there are 240/20 -> 12 frames between every
-   * tick Tick 1 <--> Tick 2 If there
-   */
-  interpolated_position_ +=
-      (position_ - interpolated_position_) * (delta_t / tick_t);
+void Transform::InterpolatePosition(float alpha) {
+  float a = glm::clamp(alpha, 0.0f, 1.0f);
+  interpolated_position_ = glm::mix(previous_position_, position_, a);
 }
+
+void Transform::CaptureTickSnapshot() { previous_position_ = position_; }
 std::vector<TransformationType> Transform::GetTransformations() {
   auto transformations = transformations_;
   return transformations;

@@ -34,7 +34,7 @@ PObjectManager::PObjectManager() {
       new std::optional<Texture2D>[kMaxEntities] {};
 };
 
-std::vector<Primitive> PObjectManager::GetPrimitives() {
+std::vector<Primitive> PObjectManager::GetPrimitives(bool refresh_vertices) {
   std::vector<Primitive> primitives;
   for (int id = 0; id < current_entity_size_; id++) {
     auto mesh = GetProperty<Mesh>(id);
@@ -46,7 +46,7 @@ std::vector<Primitive> PObjectManager::GetPrimitives() {
       primitive.opacity_ = mesh->opacity_;
       auto transform = GetProperty<Transform>(id);
       if (transform) {
-        auto world_position = transform->GetPosition();
+        auto world_position = transform->GetInterpolatedPosition();
         primitive.world_position_ = world_position;
       } else {
         primitive.world_position_ = glm::vec3(0.0f);
@@ -237,6 +237,31 @@ kEntityId PObjectManager::NewObjectFromFile(const std::string &file_path,
   AddProperty<Mesh>(id, mesh);
 
   return id;
+}
+void PObjectManager::ProcessTransformations(float alpha) {
+  auto transforms = GetProperties<Transform>();
+  auto cameras = GetProperties<Camera>();
+  for (kEntityId id = 0; id < current_entity_size_; id++) {
+    if (transforms[id].has_value()) {
+      transforms[id].value().InterpolatePosition(alpha);
+    }
+    if (cameras[id].has_value()) {
+      cameras[id].value().Interpolate(alpha);
+    }
+  }
+}
+
+void PObjectManager::CaptureTickSnapshots() {
+  auto transforms = GetProperties<Transform>();
+  auto cameras = GetProperties<Camera>();
+  for (kEntityId id = 0; id < current_entity_size_; id++) {
+    if (transforms[id].has_value()) {
+      transforms[id].value().CaptureTickSnapshot();
+    }
+    if (cameras[id].has_value()) {
+      cameras[id].value().CaptureTickSnapshot();
+    }
+  }
 }
 
 kEntityId PObjectManager::NewObject() {

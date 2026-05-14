@@ -23,8 +23,7 @@ glm::mat4 Camera::GetProjection(float width, float height) {
   float size = 40.0f;
   float aspect = width / height;
 
-  float fov = 45.0f;
-  glm::mat4 proj = glm::perspective(glm::radians(fov), aspect, 0.1f, 1000.0f);
+  glm::mat4 proj = glm::perspective(glm::radians(fov_), aspect, 0.1f, 1000.0f);
 
 #endif
 
@@ -41,8 +40,30 @@ glm::vec3 Camera::GetDirection() {
   return glm::normalize(direction);
 }
 
+glm::vec3 Camera::GetInterpolatedDirection() const {
+  glm::vec3 direction;
+  direction.x = cos(glm::radians(interpolated_yaw_)) *
+                cos(glm::radians(interpolated_pitch_));
+  direction.y = sin(glm::radians(interpolated_pitch_));
+  direction.z = sin(glm::radians(interpolated_yaw_)) *
+                cos(glm::radians(interpolated_pitch_));
+  return glm::normalize(direction);
+}
+
+void Camera::CaptureTickSnapshot() {
+  previous_yaw_ = yaw;
+  previous_pitch_ = pitch;
+}
+
+void Camera::Interpolate(float alpha) {
+  float a = glm::clamp(alpha, 0.0f, 1.0f);
+  interpolated_yaw_ = glm::mix(previous_yaw_, yaw, a);
+  interpolated_pitch_ = glm::mix(previous_pitch_, pitch, a);
+}
+
 void Camera::SetPitch(float new_val) { this->pitch = new_val; }
 float Camera::GetPitch() { return this->pitch; }
+void Camera::SetFOV(float fov) { this->fov_ = fov; }
 float Camera::GetYaw() { return this->yaw; }
 void Camera::SetYaw(float new_val) { this->yaw = new_val; }
 void Camera::UpdateYaw(float new_val) { this->yaw += new_val; }
@@ -75,7 +96,7 @@ glm::mat4 Camera::GetView(glm::vec3 position) {
   view = glm::translate(view, glm::vec3(-position.x, -position.y, 0.0));
 #else
 
-  glm::vec3 cameraFront = GetDirection();
+  glm::vec3 cameraFront = GetInterpolatedDirection();
 
   glm::vec3 cameraPos(position);
   glm::vec3 cameraUp(0.0, 1.0, 0.0);

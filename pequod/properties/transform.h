@@ -35,8 +35,13 @@ class Transform : public Property {
 
   void Move(glm::vec3);
 
-  // Run this every frame to interpolate position between ticks
-  void InterpolatePosition(float delta_t, float tick_t);
+  // Run this every frame to interpolate position between ticks.
+  // alpha is the normalized progress through the current tick in [0, 1].
+  void InterpolatePosition(float alpha);
+
+  // Snapshot position_ into previous_position_; call once at the start of
+  // each tick before any per-tick position updates run.
+  void CaptureTickSnapshot();
 
   std::vector<TransformationType> GetTransformations();
   void ClearTransformations();
@@ -50,6 +55,7 @@ class Transform : public Property {
    * so this makes sure its smoothed out
    */
   glm::vec3 interpolated_position_;
+  glm::vec3 previous_position_{};
 
   /**
    * A queue of fixed transformations made (like position and velocity) so that

@@ -17,7 +17,10 @@ class Camera : public Property {
   void SetZoom(float zoom);
   float GetZoom();
   glm::vec3 GetDirection();
+  glm::vec3 GetInterpolatedDirection() const;
   void SetDirection(glm::vec3 direction);
+
+  void SetFOV(float);
 
   float GetYaw();
   float GetPitch();
@@ -25,6 +28,12 @@ class Camera : public Property {
   void UpdateYaw(float);
   void SetPitch(float);
   void UpdatePitch(float);
+
+  // Same fixed-timestep interpolation pattern as Transform: snapshot at the
+  // start of each tick, then lerp every frame so the view doesn't snap when
+  // gameplay code rotates yaw/pitch in OnTick.
+  void CaptureTickSnapshot();
+  void Interpolate(float alpha);
 
   glm::vec3 GetRayFromScreen(glm::vec2 cursor, glm::vec2 res, glm::vec3 pos);
 
@@ -34,6 +43,12 @@ class Camera : public Property {
   glm::mat4 proj_{};
   float yaw = 45.0f;
   float pitch = -30.0f;
+  float previous_yaw_ = 45.0f;
+  float previous_pitch_ = -30.0f;
+  float interpolated_yaw_ = 45.0f;
+  float interpolated_pitch_ = -30.0f;
+
+  float fov_ = 60.0f;
 
   float coord[3] = {0.0, 100.0, 0.0};
   float zoom_ = 1.0f;

@@ -61,6 +61,9 @@ class GameScene {
 
   void SimulatePhysics();
 
+  void ProcessOnFrame(float alpha);
+  void OnTickBegin();
+
  protected:
   std::unique_ptr<PObjectManager> object_manager_ = nullptr;
   std::unique_ptr<PhysicsEngine> physics_engine_ = nullptr;
