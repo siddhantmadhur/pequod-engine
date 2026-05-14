@@ -64,6 +64,9 @@ class GameScene {
   void ProcessOnFrame(float alpha);
   void OnTickBegin();
 
+  void SetSunLight(const SunLight& sun);
+  const SunLight& GetSunLight() const;
+
  protected:
   std::unique_ptr<PObjectManager> object_manager_ = nullptr;
   std::unique_ptr<PhysicsEngine> physics_engine_ = nullptr;
@@ -74,6 +77,7 @@ class GameScene {
   float width_ = 0.0;
   float height_ = 0.0;
   bool should_close = false;
+  SunLight sun_light_{};
 };
 
 }  // namespace Pequod

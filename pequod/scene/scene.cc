@@ -53,5 +53,7 @@ void GameScene::ProcessOnFrame(float alpha) {
 void GameScene::OnTickBegin() { object_manager_->CaptureTickSnapshots(); }
 void GameScene::SetWidth(float width) { this->width_ = width; }
 float GameScene::GetHeight() const { return this->height_; }
+void GameScene::SetSunLight(const SunLight& sun) { sun_light_ = sun; }
+const SunLight& GameScene::GetSunLight() const { return sun_light_; }
 
 }  // namespace Pequod

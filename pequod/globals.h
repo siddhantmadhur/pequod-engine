@@ -41,6 +41,7 @@ struct Vertex {
   PQ_FLOAT3 position;
   PQ_FLOAT3 color;
   PQ_FLOAT2 uv;
+  PQ_FLOAT3 normal = {0.0f, 1.0f, 0.0f};
 };
 
 struct StaticVertex {
@@ -48,6 +49,24 @@ struct StaticVertex {
   PQ_FLOAT4 color;
   PQ_FLOAT2 uv;
   PQ_FLOAT4 atlas_uv;
+  PQ_FLOAT3 normal = {0.0f, 1.0f, 0.0f};
+};
+
+/**
+ * @brief Directional sun light + ambient.
+ *
+ * One per scene; populated once at scene setup and uploaded each frame.
+ */
+struct SunLight {
+  PQ_FLOAT3 direction = {-0.55f, -0.7f, -0.35f};  // from sun toward world
+  float intensity = 1.0f;
+  PQ_FLOAT3 color = {1.0f, 0.95f, 0.85f};
+  float saturation = 1.;  // 0 = grayscale, 1 = original, >1 boosts color
+  PQ_FLOAT3 ambient = {0.15f, 0.17f, 0.22f};
+
+  // Shadow tuning — not uploaded to GPU; consumed by the shadow pass for
+  // computing the orthographic light frustum.
+  float shadow_extent = 400.0f;  // half-side of the shadow frustum
 };
 
 /**

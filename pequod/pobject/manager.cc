@@ -100,11 +100,12 @@ kEntityId PObjectManager::NewBox2D(glm::vec2 position = glm::vec2(0.0),
 
   auto mesh = Mesh();
   PQ_FLOAT3 dx_color(color.r, color.g, color.b);
+  const PQ_FLOAT3 box_normal{0.0f, 0.0f, 1.0f};
   Vertex raw_vertices[4] = {
-      {PQ_FLOAT3{0.5f, 0.5f, 0.0f}, dx_color, PQ_FLOAT2{1.0f, 0.0f}},
-      {PQ_FLOAT3{0.5f, -0.5f, 0.0f}, dx_color, PQ_FLOAT2{1.0f, 1.0f}},
-      {PQ_FLOAT3{-0.5f, -0.5f, 0.0f}, dx_color, PQ_FLOAT2{0.0f, 1.0f}},
-      {PQ_FLOAT3{-0.5f, 0.5f, 0.0f}, dx_color, PQ_FLOAT2{0.0f, 0.0f}},
+      {PQ_FLOAT3{0.5f, 0.5f, 0.0f}, dx_color, PQ_FLOAT2{1.0f, 0.0f}, box_normal},
+      {PQ_FLOAT3{0.5f, -0.5f, 0.0f}, dx_color, PQ_FLOAT2{1.0f, 1.0f}, box_normal},
+      {PQ_FLOAT3{-0.5f, -0.5f, 0.0f}, dx_color, PQ_FLOAT2{0.0f, 1.0f}, box_normal},
+      {PQ_FLOAT3{-0.5f, 0.5f, 0.0f}, dx_color, PQ_FLOAT2{0.0f, 0.0f}, box_normal},
   };
   mesh.SetVertices(
       std::vector<Vertex>(std::begin(raw_vertices), std::end(raw_vertices)));
@@ -131,11 +132,12 @@ kEntityId PObjectManager::NewPlane2D(glm::vec3 position, glm::vec2 size,
 
   auto mesh = Mesh();
   PQ_FLOAT3 dx_color(color.r, color.g, color.b);
+  const PQ_FLOAT3 up_normal{0.0f, 1.0f, 0.0f};
   Vertex raw_vertices[4] = {
-      {PQ_FLOAT3{0.5f, 0.0f, 0.5f}, dx_color, PQ_FLOAT2{1.0f, 0.0f}},
-      {PQ_FLOAT3{0.5f, 0.0f, -0.5f}, dx_color, PQ_FLOAT2{1.0f, 1.0f}},
-      {PQ_FLOAT3{-0.5f, 0.0f, -0.5f}, dx_color, PQ_FLOAT2{0.0f, 1.0f}},
-      {PQ_FLOAT3{-0.5f, 0.0f, 0.5f}, dx_color, PQ_FLOAT2{0.0f, 0.0f}},
+      {PQ_FLOAT3{0.5f, 0.0f, 0.5f}, dx_color, PQ_FLOAT2{1.0f, 0.0f}, up_normal},
+      {PQ_FLOAT3{0.5f, 0.0f, -0.5f}, dx_color, PQ_FLOAT2{1.0f, 1.0f}, up_normal},
+      {PQ_FLOAT3{-0.5f, 0.0f, -0.5f}, dx_color, PQ_FLOAT2{0.0f, 1.0f}, up_normal},
+      {PQ_FLOAT3{-0.5f, 0.0f, 0.5f}, dx_color, PQ_FLOAT2{0.0f, 0.0f}, up_normal},
   };
   mesh.SetVertices(
       std::vector<Vertex>(std::begin(raw_vertices), std::end(raw_vertices)));
@@ -219,6 +221,10 @@ kEntityId PObjectManager::NewObjectFromFile(const std::string &file_path,
         } else {
           dir_vertex.uv = PQ_FLOAT2{0.0f, 0.0f};
         }
+
+        // aiProcess_GenNormals guarantees mNormals is populated.
+        const auto& n = aiMesh->mNormals[i];
+        dir_vertex.normal = PQ_FLOAT3{n.x, n.y, n.z};
         vertices.push_back(dir_vertex);
       }
 
@@ -300,6 +306,9 @@ void PObjectManager::MakeStatic(kEntityId id) {
                            mesh->opacity_};
       sv.uv = vertex.uv;
       sv.atlas_uv = PQ_FLOAT4{atlas_uv.x, atlas_uv.y, atlas_uv.z, atlas_uv.w};
+      // Static geometry has no per-frame model matrix, so the mesh-space
+      // normal is already the world-space normal.
+      sv.normal = vertex.normal;
       static_vertices_.push_back(sv);
     }
     static_ranges_.push_back(StaticRange{range_start, vertices.size(), tex});

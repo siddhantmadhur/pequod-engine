@@ -24,6 +24,18 @@ struct CameraCBuffer {
   PQ_FLOAT2 _pad;
 };
 
+// Matches the PS_LIGHT_BUFFER cbuffer in textured.ps.hlsl.
+// HLSL float3+float fields pack into single float4 slots — keep order in sync.
+struct LightCBuffer {
+  PQ_FLOAT3 sun_direction;
+  float sun_intensity;
+  PQ_FLOAT3 sun_color;
+  float saturation;
+  PQ_FLOAT3 ambient_color;
+  float _pad1;
+  DirectX::XMFLOAT4X4 shadow_view_proj;
+};
+
 class D3D11Application : public Application {
   template <typename T>
   using ComPtr = Microsoft::WRL::ComPtr<T>;
@@ -54,6 +66,7 @@ class D3D11Application : public Application {
  private:
   bool CreateSwapchainResources();
   void DestroySwapchainResources();
+  bool CreateShadowResources();
 
   template <typename T>
   bool MapBuffer(ComPtr<ID3D11Buffer>, const std::vector<T>&);
@@ -90,6 +103,18 @@ class D3D11Application : public Application {
 
   ComPtr<ID3D11Texture2D> atlas_texture_ = nullptr;
   ComPtr<ID3D11ShaderResourceView> atlas_srv_ = nullptr;
+
+  // Lighting
+  ComPtr<ID3D11Buffer> light_c_buffer_ = nullptr;
+
+  // Shadow mapping
+  ComPtr<ID3D11Texture2D> shadow_map_tex_ = nullptr;
+  ComPtr<ID3D11DepthStencilView> shadow_dsv_ = nullptr;
+  ComPtr<ID3D11ShaderResourceView> shadow_srv_ = nullptr;
+  ComPtr<ID3D11SamplerState> shadow_cmp_sampler_ = nullptr;
+  ComPtr<ID3D11VertexShader> shadow_dynamic_vs_ = nullptr;
+  ComPtr<ID3D11VertexShader> shadow_static_vs_ = nullptr;
+  ComPtr<ID3D11RasterizerState> shadow_rasterizer_state_ = nullptr;
 };
 }  // namespace Pequod
 
